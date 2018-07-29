@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jul 27 17:47:55 2018
+Numerical Analysis HW2 Q2,Q5&Q6
+@author: yz
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+#import scipy 
+#scipy.optimize,newton()
+
+'''
+HW2 Q2(c) 
+'''
+xo = 1.2
+fo = np.sin(xo)
+fp = np.cos(xo)
+i  = np.arange(-16,0,1)
+h  = np.float_power(10,i)
+err = np.abs(fp - (np.sin(xo+h)-np.sin(xo-h))/(2*h))
+
+print('minval',np.min(err))
+print('minindex',np.argmin(err))
+
+plt.loglog(h,err,'k-o')
+plt.xlabel('h')
+plt.ylabel('absolute error')
+
+########################################
+#Newton-Raphson Method
+def newton2(fn,fnp,xo1):
+    k         = 0
+    xold      = xo1
+    f0        = np.abs(fn(xo1))
+    converged = 0
+    maxiter   = 20
+    while converged == 0 and k < maxiter:
+        if np.abs(fnp(xold) <= np.float_power(10,-13)*f0):
+            print('derivative < 1e-13')
+            return
+        
+        xnew = xold - (fn(xold)/fnp(xold))
+        fnew = fn(xnew)
+        k += 1
+        if np.abs(fnew) <= np.float_power(10,-13) * f0:
+            converged = 1
+        xold = xnew
+        print(k,xnew)
+    y = xnew
+    return (y,k)
+
+'''
+HW2 Q5
+'''
+fn  = lambda x: x**2 - 3
+fnp = lambda x: 2*x
+y,k = newton2(fn,fnp,1)
+print('y=',y,', k=',k)
+
+####################################################
+#Secant Method
+def secant(f,x0,x1):
+    k          = 0
+    xold       = x0
+    xold_1     = x1
+    f0         = np.abs(f(x0))
+    #f1         = np.abs(f(x1))
+    
+    converged  = 0
+    maxiter    = 20
+    while converged == 0 and k < maxiter:
+        xnew   = xold - (f(xold)*(xold - xold_1)/(f(xold) - f(xold_1)))
+        fnew   = f(xnew)
+        k     += 1
+        if np.abs(fnew) <= np.float_power(10,-12)*f0:
+            converged = 1
+        temp   = xnew
+        xold_1 = xold
+        xold   = temp
+        print(k,xnew)
+    y          = xnew
+    return(y,k)
+
+'''
+HW2 Q6
+'''
+f1    = lambda x: np.sin(10*x) - x
+y1,k1 = secant(f1,1,0.9)
+y2,k2 = secant(f1,0.2,0.25)
+y3,k3 = secant(f1,0.5,0.6)
+y4,k4 = secant(f1,0.75,0.8)
+print('y1=',y1,', k1=',k1)
+print('y2=',y2,', k2=',k2)
+print('y3=',y3,', k3=',k3)
+print('y4=',y4,', k4=',k4)

@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jul 29 14:24:08 2018
+Numerical Analysis HW6 Q2&Q3
+@author: yz
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy
+import fplot
+
+b0   = lambda x: 1*np.exp(-x)
+b1   = lambda x: x*np.exp(-x)
+b2   = lambda x: (3/2*x**2-1/2)*np.exp(-x)
+b3   = lambda x: (5/2*x**3-3/2*x)*np.exp(-x)
+
+bb0  = scipy.integrate.quad(b0,-1,1)
+bb1  = scipy.integrate.quad(b1,-1,1)
+bb2  = scipy.integrate.quad(b2,-1,1)
+bb3  = scipy.integrate.quad(b3,-1,1)
+
+d0   = lambda x: 1
+d1   = lambda x: x**2
+d2   = lambda x: (3/2*x**2-1/2)**2
+d3   = lambda x: (5/2*x**3-3/2*x)**2
+
+dd0  = scipy.integrate.quad(d0,-1,1)
+dd1  = scipy.integrate.quad(d1,-1,1)
+dd2  = scipy.integrate.quad(d2,-1,1)
+dd3  = scipy.integrate.quad(d3,-1,1)
+
+v    = lambda x: bb0[0]/dd0[0]*1 + bb1[0]/dd1[0]*x + bb2[0]/dd2[0]*(3/2*x**2-1/2) + bb3[0]/dd3[0]*(5/2*x**3-3/2*x)
+f    = lambda x: np.exp(-x)
+
+#fplot.plot(v, -1, 1)
+#fplot.plot(f, -1, 1)
+x    = np.arange(-1,1.01,0.01)
+v1   = bb0[0]/dd0[0]*1 + bb1[0]/dd1[0]*x + bb2[0]/dd2[0]*(3/2*x**2-1/2) + bb3[0]/dd3[0]*(5/2*x**3-3/2*x)
+f1   = np.exp(-x)
+m    = np.max(np.abs(v1-f1))
+plt.figure(0)
+plt.plot(x,v1)
+plt.plot(x,f1)
+
+b10  = lambda t: np.cos(np.pi*t)
+b11  = lambda t: (2*t-1)*np.cos(np.pi*t)
+b12  = lambda t: (6*t**2-6*t+1)*np.cos(np.pi*t)
+
+bb10 = scipy.integrate.quad(b10,0,1)
+bb11 = scipy.integrate.quad(b11,0,1)
+bb12 = scipy.integrate.quad(b12,0,1)
+
+dd10 = 1
+dd11 = 1/3
+dd12 = 1/5
+
+v2   = lambda t: bb10[0]/dd10*1 + bb11[0]/dd11*(2*t-1) + bb12[0]/dd12*(6*t**2-6*t+1)
+f2   = lambda t: np.cos(np.pi*t)
+
+t    = np.arange(0,1.001,0.001)
+v2   = bb10[0]/dd10*1 + bb11[0]/dd11*(2*t-1) + bb12[0]/dd12*(6*t**2-6*t+1)
+f2   = np.cos(np.pi*t)
+m    = np.max(np.abs(v2-f2))
+plt.figure(1)
+plt.plot(t,v2)
+plt.plot(t,f2)

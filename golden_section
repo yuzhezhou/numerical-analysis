@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jul 28 17:09:35 2018
+Numerical Analysis HW3 Q1,Q2,Q4&Q5
+@author: yz
+"""
+
+import numpy as np
+#import matplotlib.pyplot as plt
+import scipy.optimize
+import fplot
+from ad import adnumber
+from ad import admath
+from ad import jacobian
+
+#modified Newton-Raphson Method
+def halley(f,fp,fp2,x0):
+    k         = 0
+    xold      = x0
+    f0        = np.abs(f(x0))
+    converged = 0
+    maxiter   = 20
+    while converged == 0 and k < maxiter:
+        if np.abs(fp(xold)) <= np.float_power(10,-18)*f0:
+            print('derivative < 1e-18')
+            return
+        xnew = xold - (f(xold)*fp(xold)/(fp(xold)**2 - f(xold)*fp2(xold)))
+        fnew = f(xnew)
+        k   += 1
+        if np.abs(fnew) <= np.float_power(10,-13):
+            converged = 1
+        xold = xnew
+        print(k,xnew)
+    y = xnew
+    return(y,k)
+    
+'''
+HW3 Q1
+'''
+f     = lambda x: (x-1)**2*np.exp(x)
+fp    = lambda x: 2*(x-1)*np.exp(x) + (x-1)**2*np.exp(x)
+fp2   = lambda x: 2*np.exp(x) + 2*np.exp(x)*(2*x-2) + (x-1)**2*np.exp(x)
+y1,k1 = halley(f,fp,fp2,0)
+y2,k2 = halley(f,fp,fp2,2)
+y3,k3 = halley(f,fp,fp2,3)
+print('initial guess 0:','y1 =',y1,', k1 =',k1)
+print('initial guess 2:','y2 =',y2,', k2 =',k2)
+print('initial guess 3:','y3 =',y3,', k3 =',k3)
+
+
+###################################################
+def golden_section(fun,x1,x2):
+    Tolx = (x2 - x1)*np.float_power(10,-3)
+    iteration = 0
+    maxiter = 100
+    t = (np.sqrt(5)-1)/2
+    
+    x1_new = x1 + (1-t)*(x2-x1)
+    x2_new = x1 + t*(x2-x1)
+    f_1    = fun(x1_new)
+    f_2    = fun(x2_new)   
+    print('iteration number')
+    
+    data   = []
+    while np.abs(x2-x1) > Tolx and iteration < maxiter:
+        
+        if f_1 < f_2:
+            x2 = x2_new
+            x2_new = x1_new
+            x1_new = x1 + (1-t)*(x2-x1)
+            f_1 = fun(x1_new)
+            f_2 = fun(x2_new)
+        else:
+            x1 = x1_new
+            x1_new = x2_new
+            x2_new = x1 + t*(x2-x1)
+            f_1 = fun(x1_new)
+            f_2 = fun(x2_new)
+        iteration += 1
+        x_min = np.minimum(x1_new,x2_new)
+        f_min = np.minimum(f_1,f_2)
+        data.append([iteration,x_min,f_min])
+        
+    print(data)
+    return (x_min) 
+'''
+HW3 Q2
+'''
+fun = lambda x: -(1/((x-0.3)**2+0.01))-(1/((x-0.9)**2+0.04))
+fplot.plot(fun, 0, 1,title='function plot')
+x1  = golden_section(fun,0.2,0.4) #golden section method               
+x2  = scipy.optimize.fminbound(fun,0.2,0.4) #scipy
+
+
+'''
+HW3 Q4
+'''
+def newtonad(a):
+    delta = 1
+    
+    while np.abs(delta) > 0.00001:
+        x = adnumber(a)
+        y = admath.log(admath.cosh(x*admath.sqrt(9.8065*0.00341)))/0.00341 - 1000
+        delta = y/y.d(x)
+        a = a - delta.x
+    root = a 
+    print(root)
+    return (root)
+
+func = lambda x:np.log(np.cosh(x*np.sqrt(9.8065*0.00341)))/0.00341 - 1000
+root_fzero = scipy.optimize.fsolve(func,5) #use python fslove
+root_newtonad = newtonad(5) #use newtonad
+
+'''
+HW3 Q5
+'''
+def newtonad3d(a):
+    #a = ([a[0]],[a[1]],[a[2]])
+    a = np.matrix.transpose(np.asarray(a))
+    xold = a
+    xnew = a
+    iteration = 0
+    p = np.ones((3,1))
+    #data = []
+    while (np.linalg.norm(p,1) >= np.float_power(10,-8)*\
+           (1+np.linalg.norm(xold,1))) and iteration <= 20:
+        x = adnumber(xnew[0])
+        y = adnumber(xnew[1])
+        z = adnumber(xnew[2])
+        f1 = -10*x+10*y
+        f2 = 28*x-y-x*z
+        f3 = x*y-(8/3)*z
+        F = (f1.x,f2.x,f3.x)
+        J = jacobian([f1,f2,f3],[x,y,z])
+        J = np.asarray(J)
+        p = (np.linalg.inv(J)).dot(F)
+        xold = xnew
+        xnew = xold - p
+        iteration += 1
+    y = xold
+    return (y)
+
+print (newtonad3d([1,1,1])) #inital guess [1,1,1]

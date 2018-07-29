@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Jul 26 17:32:16 2018
+Numerical Analysis HW1 Q7&Q8
+@author: yz
+"""
+
+# use %reset to delete variable explorer
+
+import numpy as np
+import matplotlib.pyplot as plt
+#from numpy import *
+
+'''
+HW1 Q7
+'''
+x        = np.arange(0, 1.002, 0.002)
+y        = np.exp(-x) * (np.sin(2 * np.pi * x) + 2)
+
+x1       = np.float32(x)
+y1       = np.exp(-x1) * (np.sin(2 * np.pi * x1) + 2)
+
+err      = (y-y1)/y
+rel_err  = np.max(np.abs(err))/(np.finfo(np.float32).eps/2) #approx 4.86
+#rel_round_err = max(abs(round_err))/(eps('single')/2);
+
+plt.plot(x,err)
+plt.xlabel('x')
+plt.ylabel('roundoff error')
+plt.title('error in sampling function with single precision')
+plt.show()
+
+'''
+HW1 Q8
+'''
+n          = 100001
+x2         = 1/np.arange(1,n,1)
+
+forward_s  = 0 #forward single precision
+forward_d  = 0 #forward double precision
+backward_s = 0
+backward_d = 0
+
+for i in range(0,n-1,1):
+    forward_s  += np.float32(x2[i])
+    forward_d  += (x2[i])
+    backward_s += np.float32(x2[(n-2-i)])
+    backward_d += x2[(n-2-i)]
+
+print("forward single precision =",forward_s)
+print("forward double precision =",forward_d)
+print("backward single precision =",backward_s)
+print("backward double precision =",backward_d)
